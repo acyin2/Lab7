@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -52,9 +53,15 @@ public class MorseDecoder {
         double[] returnBuffer = new double[totalBinCount];
 
         double[] sampleBuffer = new double[BIN_SIZE * inputFile.getNumChannels()];
+
         for (int binIndex = 0; binIndex < totalBinCount; binIndex++) {
-            // Get the right number of samples from the inputFile
-            // Sum all the samples together and store them in the returnBuffer
+            double value = 0;
+            for (int j = 0; j < inputFile.readFrames(sampleBuffer, BIN_SIZE); j++) {
+value += Math.abs(sampleBuffer[j]);
+                // Get the right number of samples from the inputFile
+                // Sum all the samples together and store them in the returnBuffer
+            }
+            returnBuffer[binIndex] = value;
         }
         return returnBuffer;
     }
@@ -77,6 +84,20 @@ public class MorseDecoder {
      * @return the Morse code string of dots, dashes, and spaces
      */
     private static String powerToDotDash(final double[] powerMeasurements) {
+       int count = 0;
+        for (int i = 0; i < powerMeasurements.length; i++) {
+            if (powerMeasurements[i] > POWER_THRESHOLD) {
+                count++;
+                if (count > DASH_BIN_COUNT) {
+                // store the dash value somewhere
+                } else {
+                    count = 0;
+                    // store the dot value
+                }
+            } else if (powerMeasurements[i] < POWER_THRESHOLD) {
+
+            }
+        }
         /*
          * There are four conditions to handle. Symbols should only be output when you see
          * transitions. You will also have to store how much power or silence you have seen.
